@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration status="WARN">
+    <Appenders>
+        <Lambda name="Lambda">
+            <PatternLayout>
+                <pattern>%p RequestId: %X{AWSRequestId} %c{1.}: %m%n</pattern>
+            </PatternLayout>
+        </Lambda>
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="Lambda"/>
+        </Root>
+        <Logger name="cinira" level="DEBUG" />
+        <Logger name="org.apache.fontbox" level="INFO"/>
+        <Logger name="org.apache.pdfbox" level="INFO"/>
+        <Logger name="org.apache.pdfbox.pdmodel.font" level="ERROR"/>
+        <Logger name="software.amazon.awssdk" level="WARN" />
+        <Logger name="software.amazon.awssdk.request" level="DEBUG" />
+    </Loggers>
+</Configuration>
