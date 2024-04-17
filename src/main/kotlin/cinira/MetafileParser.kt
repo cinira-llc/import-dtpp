@@ -2,6 +2,7 @@ package cinira
 
 import cinira.model.ApproachMetadata
 import cinira.model.ChartMetadata
+import cinira.model.SegmentIndex
 import cinira.parser.ApproachChartTitleLexer
 import cinira.parser.ApproachChartTitleParser
 import org.antlr.v4.runtime.CharStreams
@@ -19,7 +20,7 @@ import javax.xml.stream.events.Attribute
 
 internal class MetafileParser {
 
-    fun parse(content: InputStream) =
+    fun parse(index: SegmentIndex, content: InputStream) =
         inputFactory.createXMLEventReader(content).let { reader ->
             val context = Stack<Pair<String, MutableMap<String, String?>>>()
             var contents = MetafileAccumulator()
@@ -42,14 +43,19 @@ internal class MetafileParser {
                             val parentAttributes = context.peek().second
                             context.push(name to (parentAttributes + attributes.toMutableMap()).toMutableMap())
                         } else {
+                            val prefix = index.segment.dropLast(1)
+                            val suffixes = 'A'..index.segment.last()
+                            val segments = suffixes.map { suffix -> prefix + suffix }.sorted().toSet()
                             contents = contents.attributes(
                                 cycle = attributes["digital_tpp.cycle"]!!.toInt(),
+                                segments = segments,
                                 effectiveEndDateTime = parseEffectiveDate(attributes["digital_tpp.to_edate"]!!),
                                 effectiveStartDateTime = parseEffectiveDate(attributes["digital_tpp.from_edate"]!!)
                             )
                             context.push(name to attributes.toMutableMap())
                         }
                     }
+
                     event.isEndElement -> {
                         val (name, attributes) = context.pop()
                         if (context.isNotEmpty()) {
@@ -67,6 +73,7 @@ internal class MetafileParser {
                             }
                         }
                     }
+
                     event.isCharacters -> {
 
                         /* Received text characters; add to a special "@text" attribute of the parent element. */
@@ -142,6 +149,7 @@ internal class MetafileParser {
                             )
                         }
                 }
+
                 ChartMetadata.Type.LAND_AND_HOLD_SHORT -> contents.landAndHoldShort(chart)
                 ChartMetadata.Type.OBSTACLE_DEPARTURE_PROCEDURE -> contents.obstacleDepartureProcedure(chart)
                 ChartMetadata.Type.RADAR_MINIMUMS -> contents.radarMinimums(chart)

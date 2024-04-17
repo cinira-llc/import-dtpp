@@ -11,13 +11,14 @@ import java.time.Instant
 internal data class MetafileAccumulator(
     val metafile: CycleMetafile? = null
 ) {
-    fun attributes(cycle: Int, effectiveStartDateTime: Instant, effectiveEndDateTime: Instant) =
+    fun attributes(cycle: Int, segments: Set<String>, effectiveStartDateTime: Instant, effectiveEndDateTime: Instant) =
         if (null != metafile) {
             throw IllegalStateException("Cycle attributes already set.")
         } else {
             copy(
                 metafile = CycleMetafile(
                     cycle = cycle,
+                    segments = segments,
                     effectiveStartDateTime = effectiveStartDateTime,
                     effectiveEndDateTime = effectiveEndDateTime
                 )

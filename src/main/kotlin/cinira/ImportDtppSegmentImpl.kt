@@ -1,8 +1,10 @@
 package cinira
 
-import cinira.config.ImportDtppProperties
-import cinira.model.ItemDetails
+import cinira.model.MediaEntry
+import cinira.model.DatasetEntry
 import cinira.model.SegmentIndex
+import cinira.model.ThumbnailEntry
+import cinira.util.put
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -11,69 +13,52 @@ import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
 import org.apache.commons.io.FilenameUtils.getBaseName
 import org.apache.commons.io.IOUtils.copyLarge
 import org.apache.commons.io.input.CloseShieldInputStream
+import org.apache.pdfbox.Loader
+import org.apache.pdfbox.rendering.PDFRenderer
 import org.slf4j.LoggerFactory.getLogger
-import org.springframework.core.io.WritableResource
-import org.springframework.core.io.support.ResourcePatternResolver
+import org.springframework.core.io.Resource
+import org.springframework.util.MimeType
+import org.springframework.util.MimeTypeUtils
 import org.springframework.util.StreamUtils.drain
+import software.amazon.awssdk.services.s3.S3Client
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import java.lang.System.getenv
 import java.net.URI
 import java.nio.file.Path
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
+import javax.imageio.ImageIO
+import kotlin.io.path.name
 import kotlin.io.path.nameWithoutExtension
 
 /**
  * [ImportDtppSegment] defines the public interface to [ImportDtppSegmentImpl], and exists primarily for unit testing.
  */
 interface ImportDtppSegment {
-
-    /**
-     * Import a DTPP segment archive.
-     *
-     * @param uri the source `s3:` URI.
-     * @return [URI] the `s3:` URI to which the segment index was written.
-     */
-    fun execute(uri: URI): URI
-
-    companion object {
-
-        /**
-         * Create a [ImportDtppSegment] instance.
-         *
-         * @param resolver the [ResourcePatternResolver] component.
-         * @param config the [ImportDtppProperties] configuration.
-         * @return [ImportDtppSegment] instance.
-         */
-        fun create(resolver: ResourcePatternResolver, config: ImportDtppProperties): ImportDtppSegment =
-            ImportDtppSegmentImpl(resolver, config)
-    }
+    fun execute(archive: Resource): URI
 }
 
 /**
  * [ImportDtppSegmentImpl] is the concrete implementation of the [ImportDtppSegment] interface.
  */
 internal class ImportDtppSegmentImpl(
-    private val resolver: ResourcePatternResolver,
-    private val chartParser: ChartParser,
-    private val metafileParser: MetafileParser,
-    private val config: ImportDtppProperties
+    private val client: S3Client,
+    private val targetBucket: String,
+    private val keywordParser: KeywordParser,
+    private val metafileParser: MetafileParser
 ) : ImportDtppSegment {
-    constructor(
-        resolver: ResourcePatternResolver,
-        config: ImportDtppProperties
-    ) : this(
-        resolver = resolver,
-        chartParser = ChartParser(),
-        metafileParser = MetafileParser(),
-        config = config
+    constructor(client: S3Client, targetBucket: String) : this(
+        client = client,
+        targetBucket = targetBucket,
+        keywordParser = KeywordParser(),
+        metafileParser = MetafileParser()
     )
 
-    override fun execute(uri: URI) =
-        getBaseName(uri.path).let { baseName ->
+    override fun execute(archive: Resource) =
+        getBaseName(archive.filename).let { baseName ->
             val (segment, cycle) = baseName.split('_')
-            val archive = resolver.getResource(uri.toString());
-            log.debug("Extracting artifacts from segment [{}] from archive at [{}].", segment, uri)
+            log.debug("Extracting artifacts for segment [{}] from archive {}.", segment, archive)
             val index = archive.inputStream.use { input ->
                 var acc = SegmentIndex(
                     cycle = cycle.toInt(),
@@ -87,15 +72,15 @@ internal class ImportDtppSegmentImpl(
                             val name = path.substringAfterLast('/')
                             if ("d-TPP_Metafile.xml" == name) {
                                 log.trace("Entry [$name] is the cycle metafile.")
-                                acc = extractMetafile(acc, uri, CloseShieldInputStream.wrap(zip))
+                                acc = extractMetafile(acc, CloseShieldInputStream.wrap(zip))
                             } else if (!(name.endsWith(".PDF") && name.first().isDigit())) {
                                 log.trace("Skipping entry [$path].")
                             } else if (path.startsWith("compare_pdf/")) {
                                 log.trace("Entry [$path] is a chart diff.")
-                                acc = extractDiff(acc, uri, entry, CloseShieldInputStream.wrap(zip))
+                                acc = extractDiff(acc, entry, CloseShieldInputStream.wrap(zip))
                             } else {
                                 log.trace("Entry [$path] is a chart.")
-                                acc = extractChart(acc, uri, entry, CloseShieldInputStream.wrap(zip))
+                                acc = extractChart(acc, entry, CloseShieldInputStream.wrap(zip))
                             }
                         }
                         zip.closeEntry()
@@ -111,8 +96,8 @@ internal class ImportDtppSegmentImpl(
             }
 
             /* Store segment index. */
-            produceIndex(uri, index)
-        }
+            produceIndex(index)
+        }.uri
 
     private fun compressBzip2(data: ByteArray) =
         data.inputStream().use { input ->
@@ -125,96 +110,122 @@ internal class ImportDtppSegmentImpl(
             }
         }
 
-    private fun extractChart(acc: SegmentIndex, segment: URI, entry: ZipEntry, stream: InputStream) =
-        stream.readBytes().let { buffer ->
-            val bufferSize = buffer.size.toLong()
-            val target = config.incoming.resolve(
-                segment, config.destinations.charts,
-                mapOf("baseName" to Path.of(entry.name).nameWithoutExtension)
-            )
-            log.debug("Storing chart [{}] to [{}].", entry.name, target)
-            (resolver.getResource(target.toString()) as WritableResource)
-                .outputStream.use { output ->
-                    buffer.inputStream().use { input ->
-                        copyLarge(input, output)
-                    }
-                }
-            buffer.inputStream().use { input ->
-                acc.addChart(
-                    chart = chartParser.parse(entry.name, input),
-                    item = ItemDetails(
-                        uri = target,
-                        contentType = "application/pdf",
-                        size = bufferSize,
-                        type = ItemDetails.ItemType.CHART
+    private fun extractChart(acc: SegmentIndex, entry: ZipEntry, stream: InputStream) =
+        stream.readAllBytes().let { buffer ->
+            val name = entry.name
+            log.debug("Processing chart [{}]", name)
+
+            /* Store the chart PDF. */
+            val size = buffer.size.toLong()
+            val path = Path.of(name)
+            val base = "media/faa-dtpp/${acc.cycle}"
+            val key = "$base/pdf/$path"
+            log.trace("Storing chart [{}] to [{}].", name, key)
+            client.put(targetBucket, key, size, applicationPdf, buffer::inputStream)
+
+            /* Generate and store the chart thumbnail(s). */
+            val pdf = Loader.loadPDF(buffer)
+            val renderer = PDFRenderer(pdf)
+            val thumbnail30 = renderer.renderImageWithDPI(0, 30.0f)
+            val png30 = ByteArrayOutputStream(256 * 1024).also { output ->
+                ImageIO.write(thumbnail30, "png", output)
+            }.toByteArray()
+            val thumbnail30Key = "$base/img/${path.nameWithoutExtension}@30.png"
+            log.trace("Storing chart [{}] 30dpi thumbnail to [{}].", name, thumbnail30Key)
+            client.put(targetBucket, thumbnail30Key, png30.size.toLong(), MimeTypeUtils.IMAGE_PNG, png30::inputStream)
+
+            /* Assemble and add the segment index entry. */
+            val chart = MediaEntry(
+                contentType = applicationPdf.toString(),
+                name = name,
+                size = size,
+                type = MediaEntry.Type.CHART,
+                thumbnail = listOf(
+                    ThumbnailEntry(
+                        contentType = MimeTypeUtils.IMAGE_PNG.toString(),
+                        size = png30.size.toLong(),
+                        dimensions = arrayOf(thumbnail30.width, thumbnail30.height),
+                        dpi = 30
                     )
                 )
-            }
+            )
+            acc.addMedia(keywordParser.parse(chart, pdf))
         }
 
-    private fun extractDiff(acc: SegmentIndex, segment: URI, entry: ZipEntry, stream: InputStream) =
-        entry.size.let { entrySize ->
+    private fun extractDiff(acc: SegmentIndex, entry: ZipEntry, stream: InputStream) =
+        stream.readAllBytes().let { buffer ->
+            log.debug("Processing chart diff [{}]", entry.name)
 
-            /* Note: wrapping in InputStreamResource so an exception would be thrown if read more than once. */
-            val target = config.incoming.resolve(
-                segment,
-                config.destinations.diffs,
-                mapOf("baseName" to Path.of(entry.name).nameWithoutExtension)
-            )
-            log.debug("Storing chart diff [{}] to [{}].", entry.name, target)
-            (resolver.getResource(target.toString()) as WritableResource)
-                .outputStream.use { output ->
-                    copyLarge(stream, output)
-                }
-            acc.addItem(
-                item = ItemDetails(
-                    uri = target,
-                    contentType = "application/pdf",
-                    size = entrySize,
-                    type = ItemDetails.ItemType.DIFF
+            /* Store the diff PDF. */
+            val size = buffer.size.toLong()
+            val path = Path.of(entry.name)
+            val name = path.name
+            val base = "media/faa-dtpp/${acc.cycle}"
+            val key = "$base/pdf/$name"
+            log.trace("Storing chart diff [{}] to [{}].", name, key)
+            client.put(targetBucket, key, size, applicationPdf, buffer::inputStream)
+
+            /* Generate and store the diff thumbnail(s). */
+            val pdf = Loader.loadPDF(buffer)
+            val renderer = PDFRenderer(pdf)
+            val thumbnail30 = renderer.renderImageWithDPI(0, 30.0f)
+            val png30 = ByteArrayOutputStream(256 * 1024).also { output ->
+                ImageIO.write(thumbnail30, "png", output)
+            }.toByteArray()
+            val thumbnail30Key = "$base/img/${path.nameWithoutExtension}.png"
+            log.trace("Storing chart diff [{}] 30dpi thumbnail to [{}].", name, thumbnail30Key)
+            client.put(targetBucket, thumbnail30Key, png30.size.toLong(), MimeTypeUtils.IMAGE_PNG, png30::inputStream)
+
+            /* Assemble and add the segment index entry. */
+            val diff = MediaEntry(
+                contentType = applicationPdf.toString(),
+                name = name,
+                size = size,
+                type = MediaEntry.Type.DIFF,
+                thumbnail = listOf(
+                    ThumbnailEntry(
+                        contentType = MimeTypeUtils.IMAGE_PNG.toString(),
+                        size = png30.size.toLong(),
+                        dimensions = arrayOf(thumbnail30.width, thumbnail30.height),
+                        dpi = 30
+                    )
                 )
             )
+            acc.addMedia(diff)
         }
 
-
-    private fun extractMetafile(acc: SegmentIndex, segment: URI, stream: InputStream) =
-        metafileParser.parse(stream).let { metafile ->
+    private fun extractMetafile(acc: SegmentIndex, stream: InputStream) =
+        metafileParser.parse(acc, stream).let { metafile ->
+            log.debug("Processing cycle metafile.")
             val bzip2JsonUtf8 = compressBzip2(json.writeValueAsBytes(metafile))
-            val target = config.incoming.resolve(segment, config.destinations.metafile)
-            log.debug("Storing DTPP segment metafile to [{}].", target)
-            (resolver.getResource(target.toString()) as WritableResource)
-                .outputStream.use { output ->
-                    bzip2JsonUtf8.inputStream().use { input ->
-                        copyLarge(input, output)
-                    }
-                }
-            acc.addItem(
-                item = ItemDetails(
-                    uri = target,
+            val size = bzip2JsonUtf8.size.toLong()
+            val key = "datasets/faa-dtpp/${acc.cycle}/metafile.json.bz2"
+            log.trace("Storing cycle metafile to [{}].", key)
+            val meta = client.put(targetBucket, key, size, applicationBzip2, bzip2JsonUtf8::inputStream)
+            acc.addDataset(
+                dataset = DatasetEntry(
+                    name = meta.filename,
                     contentType = "application/json;charset=utf-8",
-                    size = bzip2JsonUtf8.size.toLong(),
-                    type = ItemDetails.ItemType.METAFILE,
-                    wrapperContentType = "application/x-bzip2"
+                    size = size,
+                    type = DatasetEntry.Type.METAFILE,
+                    wrapperContentType = applicationBzip2.toString()
                 )
             )
         }
 
-    private fun produceIndex(path: URI, index: SegmentIndex) =
+    private fun produceIndex(index: SegmentIndex) =
         json.writeValueAsBytes(index).let { jsonUtf8 ->
+            log.debug("Generating segment index.")
             val bzip2JsonUtf8 = compressBzip2(jsonUtf8)
-            val target = config.incoming.resolve(path, config.destinations.segments)
-            log.debug("Storing DTPP cycle index to [{}].", target)
-            (resolver.getResource(target.toString()) as WritableResource)
-                .outputStream.use { output ->
-                    bzip2JsonUtf8.inputStream().use { input ->
-                        copyLarge(input, output)
-                    }
-                }
-            target
+            val key = "datasets/faa-dtpp/${index.cycle}/index-${index.segment}.json.bz2"
+            log.trace("Storing segment index to [{}].", key)
+            client.put(targetBucket, key, bzip2JsonUtf8.size.toLong(), applicationBzip2, bzip2JsonUtf8::inputStream)
         }
 
     companion object {
         private val log = getLogger(ImportDtppSegmentImpl::class.java)
+        private val applicationBzip2 = MimeType.valueOf("application/x-bzip2")
+        private val applicationPdf = MimeType.valueOf("application/pdf")
         private val json = ObjectMapper()
             .registerModules(JavaTimeModule(), KotlinModule.Builder().build())
             .enable(SerializationFeature.INDENT_OUTPUT)

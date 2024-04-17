@@ -2,6 +2,7 @@ package cinira
 
 import cinira.model.ApproachMetadata
 import cinira.model.ChartMetadata
+import cinira.model.SegmentIndex
 import org.apache.commons.io.input.CloseShieldInputStream
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -31,21 +32,23 @@ internal class MetafileParserTest {
     fun `parse() parses a known segment correctly`(@Value(SEGMENT_RESOURCE) segment: Resource) {
         assertThat(segment.exists()).isTrue
         val parser = MetafileParser()
+        val index = SegmentIndex(2404, "DDTPPE")
         val metafile = segment.inputStream.let(::ZipInputStream).use { zip ->
             generateSequence(zip::getNextEntry)
                 .filter { entry -> "d-TPP_Metafile.xml" == entry.name }
-                .map { parser.parse(CloseShieldInputStream.wrap(zip)) }
+                .map { parser.parse(index, CloseShieldInputStream.wrap(zip)) }
                 .single()
         }
 
         /* Cycle attributes. */
-        assertThat(metafile.cycle).isEqualTo(2208)
-        assertThat(metafile.effectiveStartDateTime).isEqualTo("2022-08-11T09:01:00Z")
-        assertThat(metafile.effectiveEndDateTime).isEqualTo("2022-09-08T09:01:00Z")
+        assertThat(metafile.cycle).isEqualTo(2404)
+        assertThat(metafile.segments).isEqualTo(setOf("DDTPPA", "DDTPPB", "DDTPPC", "DDTPPD", "DDTPPE"))
+        assertThat(metafile.effectiveStartDateTime).isEqualTo("2024-04-18T09:01:00Z")
+        assertThat(metafile.effectiveEndDateTime).isEqualTo("2024-05-16T09:01:00Z")
 
         /* Airport diagrams. */
         assertThat(metafile.airportDiagrams)
-            .hasSize(821)
+            .hasSize(851)
             .first()
             .isEqualTo(
                 ChartMetadata(
@@ -64,21 +67,21 @@ internal class MetafileParserTest {
             .last()
             .isEqualTo(
                 ChartMetadata(
-                    name = "11234AD.PDF",
+                    name = "11931AD.PDF",
                     title = "AIRPORT DIAGRAM",
                     type = ChartMetadata.Type.AIRPORT_DIAGRAM,
                     seq = 70000,
-                    airportIcaoIdent = "KXWA",
-                    airportIdent = "XWA",
-                    airportName = "WILLISTON BASIN INTL",
-                    cityName = "WILLISTON",
-                    stateCode = "ND"
+                    airportIcaoIdent = "PHNG",
+                    airportIdent = "NGF",
+                    airportName = "KANEOHE BAY MCAS",
+                    cityName = "MOKAPU POINT",
+                    stateCode = "HI"
                 )
             )
 
         /* Alternate minimums. */
         assertThat(metafile.alternateMinimums)
-            .hasSize(1905)
+            .hasSize(1958)
             .first()
             .isEqualTo(
                 ChartMetadata(
@@ -111,7 +114,7 @@ internal class MetafileParserTest {
 
         /* Approaches. */
         assertThat(metafile.approaches)
-            .hasSize(13331)
+            .hasSize(13247)
             .first()
             .isEqualTo(
                 ApproachMetadata(
@@ -125,17 +128,18 @@ internal class MetafileParserTest {
             .last()
             .isEqualTo(
                 ApproachMetadata(
-                    chartName = "DELETED_JOB.PDF",
-                    title = "VOR/DME-A",
-                    circlingOnly = true,
-                    type = ApproachMetadata.Type.VOR_DME,
-                    variant = 'A'
+                    chartName = "11931TZ22.PDF",
+                    title = "TACAN Z RWY 22",
+                    circlingOnly = false,
+                    runway = "22",
+                    type = ApproachMetadata.Type.TACAN,
+                    variant = 'Z'
                 )
             )
 
         /* Approach charts. */
         assertThat(metafile.approachCharts)
-            .hasSize(11561)
+            .hasSize(11483)
             .first()
             .isEqualTo(
                 ChartMetadata(
@@ -156,23 +160,21 @@ internal class MetafileParserTest {
             .last()
             .isEqualTo(
                 ChartMetadata(
-                    name = "DELETED_JOB.PDF",
-                    title = "VOR/DME-A",
+                    name = "11931TZ22.PDF",
+                    title = "TACAN Z RWY 22",
                     type = ChartMetadata.Type.INSTRUMENT_APPROACH_PROCEDURE,
-                    seq = 55125,
-                    airportIcaoIdent = "KDUX",
-                    airportIdent = "DUX",
-                    airportName = "MOORE COUNTY",
-                    cityName = "DUMAS",
-                    stateCode = "TX",
-                    amendment = "6A",
-                    amendmentDate = LocalDate.parse("2015-07-23")
+                    seq = 56000,
+                    airportIcaoIdent = "PHNG",
+                    airportIdent = "NGF",
+                    airportName = "KANEOHE BAY MCAS",
+                    cityName = "MOKAPU POINT",
+                    stateCode = "HI"
                 )
             )
 
         /* Departure procedures. */
         assertThat(metafile.departureProcedures)
-            .hasSize(2991)
+            .hasSize(3019)
             .first()
             .isEqualTo(
                 ChartMetadata(
@@ -192,7 +194,7 @@ internal class MetafileParserTest {
             .isEqualTo(
                 ChartMetadata(
                     name = "11771COPTERPRIDE_C.PDF",
-                    title = "COPTER PRIDE ONE, CONT.1",
+                    title = "COPTER PRIDE TWO, CONT.1",
                     type = ChartMetadata.Type.DEPARTURE_PROCEDURE,
                     seq = 90200,
                     airportIcaoIdent = "KNHU",
@@ -205,7 +207,7 @@ internal class MetafileParserTest {
 
         /* Diverse vector areas. */
         assertThat(metafile.diverseVectorAreas)
-            .hasSize(92)
+            .hasSize(94)
             .first()
             .isEqualTo(
                 ChartMetadata(
@@ -238,7 +240,7 @@ internal class MetafileParserTest {
 
         /* Hot spots. */
         assertThat(metafile.hotSpots)
-            .hasSize(302)
+            .hasSize(297)
             .first()
             .isEqualTo(
                 ChartMetadata(
@@ -304,7 +306,7 @@ internal class MetafileParserTest {
 
         /* Land and hold short. */
         assertThat(metafile.landAndHoldShorts)
-            .hasSize(93)
+            .hasSize(91)
             .first()
             .isEqualTo(
                 ChartMetadata(
@@ -337,7 +339,7 @@ internal class MetafileParserTest {
 
         /* Obstacle departure procedures. */
         assertThat(metafile.obstacleDepartureProcedures)
-            .hasSize(230)
+            .hasSize(261)
             .first()
             .isEqualTo(
                 ChartMetadata(
@@ -356,21 +358,21 @@ internal class MetafileParserTest {
             .last()
             .isEqualTo(
                 ChartMetadata(
-                    name = "11796MARVN.PDF",
-                    title = "MARVN ONE (OBSTACLE) (RNAV)",
+                    name = "11931MUGGE.PDF",
+                    title = "MUGGE NINE (OBSTACLE)",
                     type = ChartMetadata.Type.OBSTACLE_DEPARTURE_PROCEDURE,
                     seq = 90000,
-                    airportIcaoIdent = "PAKX",
-                    airportIdent = "05K",
-                    airportName = "WILDER RUNWAY",
-                    cityName = "PORT ALSWORTH",
-                    stateCode = "AK"
+                    airportIcaoIdent = "PHNG",
+                    airportIdent = "NGF",
+                    airportName = "KANEOHE BAY MCAS",
+                    cityName = "MOKAPU POINT",
+                    stateCode = "HI"
                 )
             )
 
         /* Radar minimums. */
         assertThat(metafile.radarMinimums)
-            .hasSize(108)
+            .hasSize(99)
             .first()
             .isEqualTo(
                 ChartMetadata(
@@ -403,7 +405,7 @@ internal class MetafileParserTest {
 
         /* Standard terminal arrivals. */
         assertThat(metafile.standardTerminalArrivals)
-            .hasSize(2753)
+            .hasSize(2770)
             .first()
             .isEqualTo(
                 ChartMetadata(
@@ -436,7 +438,7 @@ internal class MetafileParserTest {
 
         /* Takeoff minimums. */
         assertThat(metafile.takeoffMinimums)
-            .hasSize(3084)
+            .hasSize(3109)
             .first()
             .isEqualTo(
                 ChartMetadata(
@@ -469,6 +471,6 @@ internal class MetafileParserTest {
     }
 
     companion object {
-        private const val SEGMENT_RESOURCE = "file:///\${CINIRA_TEST_DATASET_ROOT}/faa-dtpp/DDTPPE_220811.zip"
+        private const val SEGMENT_RESOURCE = "file:///\${CINIRA_TEST_DATASET_ROOT}/faa-dtpp/DDTPPE_240418.zip"
     }
 }

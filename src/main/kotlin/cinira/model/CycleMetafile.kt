@@ -10,21 +10,17 @@ import java.time.Instant
 data class CycleMetafile(
 
     /**
-     * Cycle number.
+     * Official cycle number (4-digit.)
      */
     val cycle: Int,
 
-    /**
-     * Effectivity start date/time.
-     */
-    @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTF")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
     val effectiveStartDateTime: Instant,
 
-    /**
-     * Effectivity end date/time.
-     */
-    @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTF")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, timezone = "UTC")
     val effectiveEndDateTime: Instant,
+
+    val segments: Set<String> = emptySet(),
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     val airportDiagrams: List<ChartMetadata> = emptyList(),

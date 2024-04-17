@@ -5,7 +5,6 @@ plugins {
 //    kotlin("kapt") version "1.9.23" apply false
     antlr
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("org.springframework.boot") version "3.2.4"
     kotlin("jvm") version "1.9.23"
     kotlin("plugin.noarg") version "1.9.23"
 }
@@ -22,19 +21,18 @@ java {
 
 dependencies {
     //<editor-fold desc="Platform dependencies">
-    implementation(platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.1.1"))
     implementation(platform("org.springframework.boot:spring-boot-dependencies:3.2.4"))
-    implementation(platform("org.springframework.cloud:spring-cloud-dependencies:2023.0.1"))
-    implementation(platform("com.amazonaws:aws-java-sdk-bom:1.12.701"))
+    implementation(platform("software.amazon.awssdk:bom:2.25.31"))
+    implementation(platform("org.apache.logging.log4j:log4j-bom:2.23.1"))
     //</editor-fold>
 
     //<editor-fold desc="ANTLR dependencies">
-    antlr("org.antlr:antlr4:4.9.3")
+    antlr("org.antlr:antlr4:4.13.1")
     //</editor-fold>
 
     //<editor-fold desc="Compile-only dependencies">
     compileOnly("com.amazonaws:aws-lambda-java-core:1.2.3")
-    compileOnly("org.slf4j:slf4j-api")
+    compileOnly("software.amazon.awssdk:aws-core")
     //</editor-fold>
 
     //<editor-fold desc="Implementation dependencies">
@@ -45,33 +43,21 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.antlr:antlr4-runtime:4.13.1")
     implementation("org.apache.commons:commons-compress:1.26.1")
+    implementation("org.apache.logging.log4j:log4j-slf4j2-impl")
     implementation("org.apache.pdfbox:pdfbox:3.0.2")
     implementation("org.apache.pdfbox:pdfbox-io:3.0.2")
     implementation("org.slf4j:slf4j-api")
     implementation("org.springframework:spring-core")
-    implementation("org.springframework.cloud:spring-cloud-function-context")
-    implementation("io.awspring.cloud:spring-cloud-aws-s3")
-    implementation("io.awspring.cloud:spring-cloud-aws-core") {
-        exclude("com.amazonaws:aws-java-sdk-ec2")
-        exclude("com.amazonaws:aws-java-sdk-kms")
-    }
-    implementation("com.amazonaws:aws-java-sdk-s3") {
-        exclude("com.amazonaws:aws-java-sdk-kms")
-    }
-
+    implementation("software.amazon.awssdk:s3")
     //</editor-fold>
 
     //<editor-fold desc="Runtime-only dependencies">
-    runtimeOnly("com.amazonaws:aws-lambda-java-log4j2:1.5.1")
-    runtimeOnly("io.awspring.cloud:spring-cloud-aws-core")
-    runtimeOnly("org.apache.logging.log4j:log4j-slf4j-impl")
-    runtimeOnly("org.slf4j:jcl-over-slf4j")
-
+    runtimeOnly("com.amazonaws:aws-lambda-java-log4j2:1.6.0")
     //</editor-fold>
 
     //<editor-fold desc="Test implementation dependencies">
+    testImplementation(platform("org.testcontainers:testcontainers-bom:1.19.7"))
     testImplementation("commons-codec:commons-codec")
-    testImplementation("com.amazonaws:aws-lambda-java-serialization:1.1.5")
     testImplementation("org.assertj:assertj-core")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
@@ -80,13 +66,18 @@ dependencies {
     testImplementation("org.mockito:mockito-core")
     testImplementation("org.springframework:spring-beans")
     testImplementation("org.springframework:spring-test")
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:localstack")
+    testImplementation("software.amazon.awssdk:auth")
+    testImplementation("software.amazon.awssdk:regions")
+    testImplementation("software.amazon.awssdk:s3")
     //</editor-fold>
 
     //<editor-fold desc="Runtime-only dependencies">
-    testRuntimeOnly("ch.qos.logback:logback-classic")
     testRuntimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testRuntimeOnly("org.springframework.boot:spring-boot-starter-test")
+    testRuntimeOnly("org.testcontainers:localstack")
     //</editor-fold>
 }
 
@@ -96,9 +87,12 @@ repositories {
     ciniraArtifacts(this)
 }
 
-configurations.implementation {
-    exclude(group = "com.ibm.icu", module = "icu4j")
-    exclude(group = "commons-logging", module = "commons-logging")
+configurations {
+    runtimeOnly {
+        exclude("com.ibm.icu", "icu4j")
+        exclude("org.slf4j", "jul-to-slf4j")
+        exclude("org.apache.logging.log4j", "log4j-to-slf4j")
+    }
 }
 
 kotlin {
@@ -130,7 +124,7 @@ tasks.named("sourcesJar") {
 }
 
 tasks.withType<ShadowJar> {
-    archiveClassifier.set("")
+    archiveClassifier = "aws-lambda"
     transform(Log4j2PluginsCacheFileTransformer::class.java)
 }
 

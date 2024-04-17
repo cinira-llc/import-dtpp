@@ -7,8 +7,8 @@ import org.antlr.v4.runtime.Token
 import java.lang.IllegalArgumentException
 
 /**
- * [ExtractIapData] is an implementation of the [ApproachChartTitleBaseListener] interface which
- * parses approach procedure metadata from an approach chart title.
+ * [ExtractIapData] is an implementation of the [ApproachChartTitleBaseListener] interface which parses approach
+ * procedure metadata from an approach chart title.
  */
 internal class ExtractIapData(
     private val chartName: String,

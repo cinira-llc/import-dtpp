@@ -18,23 +18,25 @@ data class SegmentIndex(
      */
     val segment: String,
 
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    val charts: List<ChartDetails> = emptyList(),
-
     /**
-     * Chart names and details derived from chart PDFs.
+     * Data files extracted from the segment.
      */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    val items: List<ItemDetails> = emptyList()
+    val dataset: List<DatasetEntry> = emptyList(),
+
+    /**
+     * Media files extracted from the segment.
+     */
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    val media: List<MediaEntry> = emptyList()
 ) {
-    fun addChart(chart: ChartDetails, item: ItemDetails) =
+    fun addMedia(media: MediaEntry) =
         copy(
-            charts = charts + chart,
-            items = items + item
+            media = this.media + media
         )
 
-    fun addItem(item: ItemDetails) =
+    fun addDataset(dataset: DatasetEntry) =
         copy(
-            items = items + item
+            dataset = this.dataset + dataset
         )
 }
