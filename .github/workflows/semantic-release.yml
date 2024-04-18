@@ -41,9 +41,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: ${{ steps.semantic_version.outputs.new_version }}
         with:
-          generate_release_notes: ${{ !startsWith(steps.semantic_version.outputs.release_type, "pre") }}
+          generate_release_notes: ${{ !startsWith(steps.semantic_version.outputs.release_type, 'pre') }}
           name: v${{ steps.semantic_version.outputs.new_version }}
-          prerelease: ${{ startsWith(steps.semantic_version.outputs.release_type, "pre") }}
+          prerelease: ${{ startsWith(steps.semantic_version.outputs.release_type, 'pre') }}
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             ./build/libs/import-dtpp-${{ steps.semantic_version.outputs.new_version }}.jar
