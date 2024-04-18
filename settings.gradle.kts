@@ -7,7 +7,7 @@ plugins {
 extensions.getByName<NyxExtension>("nyx").apply {
     initialVersion = "1.0.0"
     preset = "simple"
-    verbosity = "DEBUG"
+    verbosity = "INFO"
     releaseTypes {
         publicationServices.add("github")
         items {
