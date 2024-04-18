@@ -34,4 +34,4 @@ jobs:
       - uses: mooltiverse/nyx-github-action@main
         with:
           command: mark
-          preset: simple
+          preset: "simple"
