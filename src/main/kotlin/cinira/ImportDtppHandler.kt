@@ -10,7 +10,7 @@ import java.lang.System.getenv
 import java.net.URI
 
 @Suppress("unused")
-class ImportDtpp internal constructor(
+class ImportDtppHandler internal constructor(
     private val client: S3Client,
     private val importer: ImportDtppSegment
 ) : RequestHandler<S3Event, List<URI>> {
@@ -33,13 +33,11 @@ class ImportDtpp internal constructor(
             val key = record.s3.`object`.key
             log.debug("Processing dTPP segment at bucket [{}] key [{}].", bucket, key)
             val resource = client.get(bucket, key)
-            importer.execute(resource).also {
-                client.deleteObject { delete -> delete.bucket(bucket).key(key) }
-            }
+            importer.execute(resource)
         }.toList()
     }
 
     companion object {
-        private val log = LoggerFactory.getLogger(ImportDtpp::class.java)
+        private val log = LoggerFactory.getLogger(ImportDtppHandler::class.java)
     }
 }
