@@ -34,3 +34,6 @@ jobs:
       - uses: mooltiverse/nyx-github-action@main
         with:
           command: mark
+          preset: simple
+          releaseLenient: false
+          releasePrefix: v
