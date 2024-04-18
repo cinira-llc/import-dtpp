@@ -24,7 +24,7 @@ jobs:
           cache: gradle
       - uses: gradle/actions/setup-gradle@v3
       - name: Build, test, and release (if appropriate) all components
-        run: ./gradlew release
+        run: ./gradlew build release
       - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
