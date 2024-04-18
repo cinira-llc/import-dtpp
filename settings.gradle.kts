@@ -23,9 +23,13 @@ extensions.getByName<NyxExtension>("nyx").apply {
         create("github") {
             type = "GITHUB"
             options {
-                "AUTHENTICATION_TOKEN" to "{{#environmentVariable}}GH_TOKEN{{/environmentVariable}}"
-                "REPOSITORY_NAME" to "artifacts"
-                "REPOSITORY_OWNER" to "cinira-llc"
+                putAll(
+                    mapOf(
+                        "AUTHENTICATION_TOKEN" to "{{#environmentVariable}}GH_TOKEN{{/environmentVariable}}",
+                        "REPOSITORY_NAME" to "import-dtpp",
+                        "REPOSITORY_OWNER" to "cinira-llc"
+                    )
+                )
             }
         }
     }
