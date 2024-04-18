@@ -1,0 +1,32 @@
+name: Release
+on:
+  push:
+    branches:
+      - master
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+jobs:
+  build_and_release:
+    name: Build and release
+    permissions:
+      checks: write
+    runs-on:
+      - ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v3
+        with:
+          java-version: "21"
+          distribution: temurin
+          cache: gradle
+      - uses: gradle/actions/setup-gradle@v3
+      - name: Build, test, and release (if appropriate) all components
+        run: ./gradlew release
+      - name: Publish test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          comment_mode: off
+          files: ./**/build/test-results/test/*.xml
