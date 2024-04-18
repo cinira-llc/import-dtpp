@@ -50,7 +50,7 @@ internal class ImportDtppSegmentImplTest {
             .region(Region.of("us-east-1"))
             .build()
         client.createBucket { create -> create.bucket("cinira") }
-        val instance = ImportDtppSegmentImpl(client, "cinira", KeywordParser(), MetafileParser())
+        val instance = ImportDtppSegmentImpl(client, "cinira")
         val tasks = segments.map { segment ->
             ForkJoinPool.commonPool().submit {
                 instance.execute(segment)

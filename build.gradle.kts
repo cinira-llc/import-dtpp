@@ -2,10 +2,8 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import com.github.jengelman.gradle.plugins.shadow.transformers.Log4j2PluginsCacheFileTransformer
 
 plugins {
-//    kotlin("kapt") version "1.9.23" apply false
     antlr
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("com.mooltiverse.oss.nyx") version "3.0.1"
     kotlin("jvm") version "1.9.23"
     kotlin("plugin.noarg") version "1.9.23"
 }
@@ -94,10 +92,6 @@ configurations {
         exclude("org.slf4j", "jul-to-slf4j")
         exclude("org.apache.logging.log4j", "log4j-to-slf4j")
     }
-}
-
-nyx {
-    preset = "extended"
 }
 
 kotlin {

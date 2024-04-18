@@ -23,7 +23,6 @@ import org.springframework.util.StreamUtils.drain
 import software.amazon.awssdk.services.s3.S3Client
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
-import java.lang.System.getenv
 import java.net.URI
 import java.nio.file.Path
 import java.util.zip.ZipEntry
@@ -42,13 +41,13 @@ interface ImportDtppSegment {
 /**
  * [ImportDtppSegmentImpl] is the concrete implementation of the [ImportDtppSegment] interface.
  */
-internal class ImportDtppSegmentImpl(
+internal class ImportDtppSegmentImpl private constructor(
     private val client: S3Client,
     private val targetBucket: String,
     private val keywordParser: KeywordParser,
     private val metafileParser: MetafileParser
 ) : ImportDtppSegment {
-    constructor(client: S3Client, targetBucket: String) : this(
+    internal constructor(client: S3Client, targetBucket: String) : this(
         client = client,
         targetBucket = targetBucket,
         keywordParser = KeywordParser(),
