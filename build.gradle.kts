@@ -80,6 +80,7 @@ dependencies {
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 configurations {
