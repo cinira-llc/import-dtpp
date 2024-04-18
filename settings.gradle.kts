@@ -12,10 +12,10 @@ extensions.getByName<NyxExtension>("nyx").apply {
         publicationServices.add("github")
         items {
             create("mainline") {
-                publish = "true"
+                assets = "true"
                 gitTag = "true"
                 gitPush = "true"
-//                gitCommit = "true"
+                publish = "true"
             }
         }
     }
