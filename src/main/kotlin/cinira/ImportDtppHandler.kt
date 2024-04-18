@@ -9,6 +9,9 @@ import software.amazon.awssdk.services.s3.S3Client
 import java.lang.System.getenv
 import java.net.URI
 
+/**
+ * Lambda entry point.
+ */
 @Suppress("unused")
 class ImportDtppHandler internal constructor(
     private val client: S3Client,
