@@ -35,5 +35,3 @@ jobs:
         with:
           command: mark
           preset: simple
-          releaseLenient: false
-          releasePrefix: v
