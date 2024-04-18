@@ -7,6 +7,8 @@ env:
 jobs:
   build_and_test:
     name: Build and test
+    permissions:
+      checks: write
     runs-on:
       - ubuntu-latest
     steps:
@@ -26,4 +28,5 @@ jobs:
         if: always()
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
+          comment_mode: off
           files: ./build/test-results/test/*.xml
