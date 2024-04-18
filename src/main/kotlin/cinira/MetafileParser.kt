@@ -28,6 +28,8 @@ internal class MetafileParser {
                 val event = reader.nextEvent()
                 when {
                     event.isStartElement -> {
+
+
                         /* Started an element; push a new entry onto the context stack, including all attributes
                         (and, if it has ancestor(s), ancestor attributes.) Note that ancestor attributes are
                         prefixed by the local name of the ancestor element, followed by a dot. This allows us to
