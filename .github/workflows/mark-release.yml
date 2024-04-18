@@ -6,11 +6,10 @@ on:
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
-  build_and_release:
-    name: Build and release
+  mark_release:
+    name: Mark release if appropriate
     permissions:
       checks: write
-      contents: write
     runs-on:
       - ubuntu-latest
     steps:
@@ -23,11 +22,15 @@ jobs:
           distribution: temurin
           cache: gradle
       - uses: gradle/actions/setup-gradle@v3
-      - name: Build, test, and release (if appropriate) all components
-        run: ./gradlew build release
+      - name: Build and test
+        run: ./gradlew test
       - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
           comment_mode: off
           files: ./**/build/test-results/test/*.xml
+      - uses: mooltiverse/nyx-github-action@main
+        with:
+          command: mark
+          releasePrefix: "v_"
