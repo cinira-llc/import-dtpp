@@ -47,4 +47,4 @@ jobs:
           tag_name: ${{ steps.semantic_version.outputs.new_version }}
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
-            ./build/libs/import-dtpp-${{ steps.semantic_version.outputs.new_version }}.jar
+            ./build/libs/import-dtpp-${{ steps.semantic_version.outputs.new_version }}-aws-lambda.jar
