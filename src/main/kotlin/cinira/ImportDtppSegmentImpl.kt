@@ -198,7 +198,7 @@ internal class ImportDtppSegmentImpl private constructor(
             log.debug("Processing cycle metafile.")
             val bzip2JsonUtf8 = compressBzip2(json.writeValueAsBytes(metafile))
             val size = bzip2JsonUtf8.size.toLong()
-            val key = "datasets/faa-dtpp/${acc.cycle}/metafile.json.bz2"
+            val key = "dataset/faa-dtpp/${acc.cycle}/metafile.json.bz2"
             log.trace("Storing cycle metafile to [{}].", key)
             val meta = client.put(targetBucket, key, size, applicationBzip2, bzip2JsonUtf8::inputStream)
             acc.addDataset(
@@ -216,7 +216,7 @@ internal class ImportDtppSegmentImpl private constructor(
         json.writeValueAsBytes(index).let { jsonUtf8 ->
             log.debug("Generating segment index.")
             val bzip2JsonUtf8 = compressBzip2(jsonUtf8)
-            val key = "datasets/faa-dtpp/${index.cycle}/index-${index.segment}.json.bz2"
+            val key = "dataset/faa-dtpp/${index.cycle}/index-${index.segment}.json.bz2"
             log.trace("Storing segment index to [{}].", key)
             client.put(targetBucket, key, bzip2JsonUtf8.size.toLong(), applicationBzip2, bzip2JsonUtf8::inputStream)
         }
