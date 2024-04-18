@@ -8,11 +8,15 @@ extensions.getByName<NyxExtension>("nyx").apply {
     initialVersion = "1.0.0"
     preset = "simple"
     verbosity = "INFO"
+    releaseAssets {
+        create("awsLambdaJar") {
+            path = "build/libs/import-dtpp-{{ version }}-aws-lambda.jar"
+        }
+    }
     releaseTypes {
         publicationServices.add("github")
         items {
             create("mainline") {
-                assets = "true"
                 gitTag = "true"
                 gitPush = "true"
                 publish = "true"
