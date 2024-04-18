@@ -1,11 +1,11 @@
-name: Semantic release
+name: Semantic version
 on:
   push:
     branches:
       - master
 jobs:
-  semantic_release:
-    name: Semantic release
+  semantic_version:
+    name: Semantic version
     permissions:
       checks: write
       contents: write
