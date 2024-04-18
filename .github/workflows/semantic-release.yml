@@ -30,6 +30,10 @@ jobs:
           comment_mode: off
           files: ./**/build/test-results/test/*.xml
       - uses: mathieudutour/github-tag-action@v6.2
+        id: semantic_version
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tag_prefix: v_
+      - name: Build and test all components
+        if: ${{ steps.semantic_version.outputs.new_version }}
+        run: ./gradlew -Pversion=${{ steps.semantic_version.outputs.new_version }} build
