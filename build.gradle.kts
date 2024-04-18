@@ -120,7 +120,7 @@ tasks.named("sourcesJar") {
 }
 
 tasks.withType<ShadowJar> {
-    archiveClassifier = "aws-lambda"
+    archiveClassifier = ""
     transform(Log4j2PluginsCacheFileTransformer::class.java)
 }
 

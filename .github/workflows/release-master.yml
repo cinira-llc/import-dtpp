@@ -1,44 +1,47 @@
-name: Semantic version
+name: Release master on semantic version change
 on:
   push:
     branches:
       - master
 jobs:
-  semantic_version:
-    name: Semantic version
+  release_master:
+    name: Release master
     permissions:
       checks: write
       contents: write
     runs-on:
       - ubuntu-latest
     steps:
+
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
       - uses: actions/setup-java@v3
         with:
           java-version: "21"
           distribution: temurin
           cache: gradle
       - uses: gradle/actions/setup-gradle@v3
-      - name: Build and test
-        run: ./gradlew test
-      - name: Publish test results
-        uses: EnricoMi/publish-unit-test-result-action@v2
+
+      - run: ./gradlew test
+
+      - uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
           comment_mode: off
           files: ./**/build/test-results/test/*.xml
+
       - uses: mathieudutour/github-tag-action@v6.2
         id: semantic_version
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tag_prefix: v_
-      - name: Build and test all components
+
+      - run: ./gradlew -x test -Pversion=${{ steps.semantic_version.outputs.new_version }} build
         if: ${{ steps.semantic_version.outputs.new_version }}
-        run: ./gradlew -x test -Pversion=${{ steps.semantic_version.outputs.new_version }} build
-      - name: Create release
-        uses: softprops/action-gh-release@v1
+
+      - uses: softprops/action-gh-release@v1
         if: ${{ steps.semantic_version.outputs.new_version }}
         with:
           generate_release_notes: ${{ !startsWith(steps.semantic_version.outputs.release_type, 'pre') }}
@@ -47,4 +50,4 @@ jobs:
           tag_name: ${{ steps.semantic_version.outputs.new_version }}
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
-            ./build/libs/import-dtpp-${{ steps.semantic_version.outputs.new_version }}-aws-lambda.jar
+            ./build/libs/import-dtpp-${{ steps.semantic_version.outputs.new_version }}.jar
