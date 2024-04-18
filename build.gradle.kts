@@ -8,8 +8,6 @@ plugins {
     kotlin("plugin.noarg") version "1.9.23"
 }
 
-apply(from = "./repository.gradle.kts")
-
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(21))

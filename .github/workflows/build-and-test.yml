@@ -21,7 +21,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
       - name: Build and test
         id: build_and_test
-        run: ./gradlew --no-daemon javadoc test
+        run: ./gradlew javadoc test
       - name: Publish test results
         if: always()
         uses: EnricoMi/publish-unit-test-result-action@v2
