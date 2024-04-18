@@ -1,13 +1,11 @@
-name: Mark release
+name: Semantic release
 on:
   push:
     branches:
       - master
-env:
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
-  mark_release:
-    name: Mark release if appropriate
+  semantic_release:
+    name: Semantic release
     permissions:
       checks: write
       contents: write
@@ -31,7 +29,9 @@ jobs:
         with:
           comment_mode: off
           files: ./**/build/test-results/test/*.xml
-      - uses: mooltiverse/nyx-github-action@main
+      - uses: cycjimmy/semantic-release-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
-          command: mark
-          preset: "simple"
+          tag_format: v_${version}
