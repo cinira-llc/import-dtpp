@@ -79,9 +79,7 @@ dependencies {
 }
 
 repositories {
-    val ciniraArtifacts: Action<RepositoryHandler> by rootProject.extra
     mavenCentral()
-    ciniraArtifacts(this)
 }
 
 configurations {
