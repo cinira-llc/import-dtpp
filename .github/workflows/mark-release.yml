@@ -10,6 +10,7 @@ jobs:
     name: Mark release if appropriate
     permissions:
       checks: write
+      contents: write
     runs-on:
       - ubuntu-latest
     steps:
@@ -33,4 +34,3 @@ jobs:
       - uses: mooltiverse/nyx-github-action@main
         with:
           command: mark
-          releasePrefix: "v_"
