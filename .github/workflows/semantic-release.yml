@@ -29,9 +29,8 @@ jobs:
         with:
           comment_mode: off
           files: ./**/build/test-results/test/*.xml
-      - uses: cycjimmy/semantic-release-action@v4
+      - uses: paulhatch/semantic-version@5.3.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
-          tag_format: v_${version}
+          tag_prefix: v_
