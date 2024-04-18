@@ -78,11 +78,6 @@ dependencies {
     //</editor-fold>
 }
 
-repositories {
-    mavenCentral()
-    mavenLocal()
-}
-
 configurations {
     runtimeOnly {
         exclude("com.ibm.icu", "icu4j")
