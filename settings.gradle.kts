@@ -11,13 +11,13 @@ extensions.getByName<NyxExtension>("nyx").apply {
     releaseTypes {
         publicationServices.add("github")
         items {
-            register("mainline") {
+            create("mainline") {
                 gitCommit = "true"
             }
         }
     }
     services {
-        register("github") {
+        create("github") {
             type = "GITHUB"
             options {
                 "AUTHENTICATION_TOKEN" to "{{#environmentVariable}}GH_TOKEN{{/environmentVariable}}"
