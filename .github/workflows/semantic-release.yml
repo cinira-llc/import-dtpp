@@ -36,4 +36,14 @@ jobs:
           tag_prefix: v_
       - name: Build and test all components
         if: ${{ steps.semantic_version.outputs.new_version }}
-        run: ./gradlew -Pversion=${{ steps.semantic_version.outputs.new_version }} build
+        run: ./gradlew -x test -Pversion=${{ steps.semantic_version.outputs.new_version }} build
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        if: ${{ steps.semantic_version.outputs.new_version }}
+        with:
+          generate_release_notes: ${{ !startsWith(steps.semantic_version.outputs.release_type, "pre") }}
+          name: v${{ steps.semantic_version.outputs.new_version }}
+          prerelease: ${{ startsWith(steps.semantic_version.outputs.release_type, "pre") }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            ./build/libs/import-dtpp-${{ steps.semantic_version.outputs.new_version }}.jar
