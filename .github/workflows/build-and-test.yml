@@ -18,6 +18,7 @@ jobs:
           java-version: "21"
           distribution: temurin
           cache: gradle
+      - uses: gradle/actions/setup-gradle@v3
       - name: Build and test
         id: build_and_test
         run: ./gradlew --no-daemon javadoc test
