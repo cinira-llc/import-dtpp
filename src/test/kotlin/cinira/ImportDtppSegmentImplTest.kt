@@ -5,10 +5,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.Resource
-import org.springframework.core.io.support.ResourcePatternResolver
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.testcontainers.containers.localstack.LocalStackContainer
 import org.testcontainers.junit.jupiter.Container
@@ -41,8 +39,7 @@ internal class ImportDtppSegmentImplTest {
 
     @Test
     fun `import() correctly imports a known cycle successfully`(
-        @Autowired resolver: ResourcePatternResolver,
-        @Value("file:///\${CINIRA_TEST_DATASET_ROOT}/faa-dtpp/DDTPP*.zip") segments: Array<Resource>
+        @Value("file:///\${CINIRA_TEST_DATASET_ROOT}/faa-dtpp/DDTPP?_240418.zip") segments: Array<Resource>
     ) {
         assertThat(segments).isNotEmpty
         val credentials = AwsBasicCredentials.create(localstack.accessKey, localstack.secretKey)
@@ -53,7 +50,7 @@ internal class ImportDtppSegmentImplTest {
             .region(Region.of("us-east-1"))
             .build()
         client.createBucket { create -> create.bucket("cinira") }
-        val instance = ImportDtppSegmentImpl(client, KeywordParser(), MetafileParser(), "cinira")
+        val instance = ImportDtppSegmentImpl(client, "cinira", KeywordParser(), MetafileParser())
         val tasks = segments.map { segment ->
             ForkJoinPool.commonPool().submit {
                 instance.execute(segment)
