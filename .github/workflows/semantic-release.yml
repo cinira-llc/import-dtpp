@@ -44,6 +44,7 @@ jobs:
           generate_release_notes: ${{ !startsWith(steps.semantic_version.outputs.release_type, 'pre') }}
           name: v${{ steps.semantic_version.outputs.new_version }}
           prerelease: ${{ startsWith(steps.semantic_version.outputs.release_type, 'pre') }}
+          tag_name: ${{ steps.semantic_version.outputs.new_version }}
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             ./build/libs/import-dtpp-${{ steps.semantic_version.outputs.new_version }}.jar
