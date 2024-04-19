@@ -117,7 +117,7 @@ internal class ImportDtppSegmentImpl private constructor(
             /* Store the chart PDF. */
             val size = buffer.size.toLong()
             val path = Path.of(name)
-            val base = "media/faa-dtpp/${acc.cycle}"
+            val base = "content/library/active/faa-dtpp/${acc.cycle}"
             val key = "$base/pdf/$path"
             log.trace("Storing chart [{}] to [{}].", name, key)
             client.put(targetBucket, key, size, applicationPdf, buffer::inputStream)
@@ -159,7 +159,7 @@ internal class ImportDtppSegmentImpl private constructor(
             val size = buffer.size.toLong()
             val path = Path.of(entry.name)
             val name = path.name
-            val base = "media/faa-dtpp/${acc.cycle}"
+            val base = "content/library/history/faa-dtpp/${acc.cycle}"
             val key = "$base/pdf/$name"
             log.trace("Storing chart diff [{}] to [{}].", name, key)
             client.put(targetBucket, key, size, applicationPdf, buffer::inputStream)
@@ -172,7 +172,7 @@ internal class ImportDtppSegmentImpl private constructor(
                 ImageIO.write(thumbnail30, "png", output)
             }.toByteArray()
             val thumbnail30Key = "$base/img/${path.nameWithoutExtension}.png"
-            log.trace("Storing chart diff [{}] 30dpi thumbnail to [{}].", name, thumbnail30Key)
+            log.trace("Storing chart revision [{}] 30dpi thumbnail to [{}].", name, thumbnail30Key)
             client.put(targetBucket, thumbnail30Key, png30.size.toLong(), MimeTypeUtils.IMAGE_PNG, png30::inputStream)
 
             /* Assemble and add the segment index entry. */

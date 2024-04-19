@@ -22,7 +22,7 @@ import java.util.concurrent.ForkJoinPool
 import java.util.concurrent.ForkJoinTask
 
 /**
- * [ImportDtppHandlerSegmentImplTest] provides unit test coverage for [ImportDtppSegmentImpl].
+ * [ImportDtppSegmentImplTest] provides unit test coverage for [ImportDtppSegmentImpl].
  */
 @EnabledIfEnvironmentVariable(
     named = "CINIRA_TEST_DATASET_ROOT",
@@ -31,7 +31,7 @@ import java.util.concurrent.ForkJoinTask
 )
 @Testcontainers
 @ExtendWith(SpringExtension::class)
-internal class ImportDtppHandlerSegmentImplTest {
+internal class ImportDtppSegmentImplTest {
 
     @Container
     private val localstack = LocalStackContainer(DockerImageName.parse("localstack/localstack"))
@@ -63,6 +63,6 @@ internal class ImportDtppHandlerSegmentImplTest {
             .sortedBy(S3Object::key)
             .map { obj -> digest.update("${obj.eTag()}:${obj.key()}".toByteArray()) }
         assertThat(Hex.encodeHexString(digest.digest()))
-            .isEqualTo("f7d59527608cabb96abf8f8d6f42f6197746bad4a93dcf62d1cb665ee38c4e65")
+            .isEqualTo("211b60aa0e3ef38e388317b7c71df9a3d4abd5bfa1d1cf12d59c12aa355067da")
     }
 }
