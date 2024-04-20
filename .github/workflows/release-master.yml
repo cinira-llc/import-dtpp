@@ -30,7 +30,7 @@ jobs:
         if: always()
         with:
           comment_mode: off
-          files: ./**/build/test-results/test/*.xml
+          files: ./build/test-results/test/*.xml
 
       - uses: mathieudutour/github-tag-action@v6.2
         id: semantic_version
@@ -47,7 +47,7 @@ jobs:
           generate_release_notes: ${{ !startsWith(steps.semantic_version.outputs.release_type, 'pre') }}
           name: v${{ steps.semantic_version.outputs.new_version }}
           prerelease: ${{ startsWith(steps.semantic_version.outputs.release_type, 'pre') }}
-          tag_name: ${{ steps.semantic_version.outputs.new_version }}
+          tag_name: v_${{ steps.semantic_version.outputs.new_version }}
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             ./build/libs/import-dtpp-${{ steps.semantic_version.outputs.new_version }}.jar
