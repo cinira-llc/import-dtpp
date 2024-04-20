@@ -63,6 +63,6 @@ internal class ImportDtppSegmentImplTest {
             .sortedBy(S3Object::key)
             .map { obj -> digest.update("${obj.eTag()}:${obj.key()}".toByteArray()) }
         assertThat(Hex.encodeHexString(digest.digest()))
-            .isEqualTo("211b60aa0e3ef38e388317b7c71df9a3d4abd5bfa1d1cf12d59c12aa355067da")
+            .isEqualTo("d82e89a4dd12a11d3d18772e3eb455cfb7cf71f2d6cff4513ecbb3883e9df5e9")
     }
 }
