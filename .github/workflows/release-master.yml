@@ -22,6 +22,7 @@ jobs:
           java-version: "21"
           distribution: temurin
           cache: gradle
+
       - uses: gradle/actions/setup-gradle@v3
 
       - run: ./gradlew test
@@ -39,10 +40,10 @@ jobs:
           tag_prefix: v_
 
       - run: ./gradlew -x test -Pversion=${{ steps.semantic_version.outputs.new_version }} build
-        if: ${{ steps.semantic_version.outputs.new_version != '' }}
+        if: ${{ steps.semantic_version.outputs.new_version != undefined }}
 
       - uses: softprops/action-gh-release@v1
-        if: ${{ steps.semantic_version.outputs.new_version != '' }}
+        if: ${{ steps.semantic_version.outputs.new_version != undefined }}
         with:
           generate_release_notes: ${{ !startsWith(steps.semantic_version.outputs.release_type, 'pre') }}
           name: v${{ steps.semantic_version.outputs.new_version }}
