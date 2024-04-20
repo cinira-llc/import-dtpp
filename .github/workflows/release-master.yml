@@ -39,10 +39,10 @@ jobs:
           tag_prefix: v_
 
       - run: ./gradlew -x test -Pversion=${{ steps.semantic_version.outputs.new_version }} build
-        if: ${{ steps.semantic_version.outputs.new_version }}
+        if: ${{ steps.semantic_version.outputs.new_version != '' }}
 
       - uses: softprops/action-gh-release@v1
-        if: ${{ steps.semantic_version.outputs.new_version }}
+        if: ${{ steps.semantic_version.outputs.new_version != '' }}
         with:
           generate_release_notes: ${{ !startsWith(steps.semantic_version.outputs.release_type, 'pre') }}
           name: v${{ steps.semantic_version.outputs.new_version }}
