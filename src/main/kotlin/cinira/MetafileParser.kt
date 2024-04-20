@@ -8,6 +8,7 @@ import cinira.parser.ApproachChartTitleParser
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import java.io.InputStream
+import java.lang.Integer.parseInt
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -110,6 +111,7 @@ internal class MetafileParser {
                 airportIdent = attributes["airport_name.apt_ident"]!!,
                 airportName = attributes["airport_name.ID"]!!,
                 cityName = attributes["city_name.ID"]!!,
+                procedureUid = attributes["procuid"]?.let(::parseInt),
                 stateCode = attributes["state_code.ID"]!!,
                 amendment = attributes["amdtnum"],
                 amendmentDate = attributes["amdtdate"]?.let { date ->

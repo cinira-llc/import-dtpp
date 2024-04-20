@@ -60,6 +60,7 @@ internal class MetafileParserTest {
                     airportIdent = "ABI",
                     airportName = "ABILENE RGNL",
                     cityName = "ABILENE",
+                    procedureUid = 1,
                     stateCode = "TX"
                 )
             )
@@ -75,6 +76,7 @@ internal class MetafileParserTest {
                     airportIdent = "NGF",
                     airportName = "KANEOHE BAY MCAS",
                     cityName = "MOKAPU POINT",
+                    procedureUid = 41566,
                     stateCode = "HI"
                 )
             )
@@ -151,6 +153,7 @@ internal class MetafileParserTest {
                     airportIdent = "ABI",
                     airportName = "ABILENE RGNL",
                     cityName = "ABILENE",
+                    procedureUid = 2,
                     stateCode = "TX",
                     amendment = "7B",
                     amendmentDate = LocalDate.parse("2019-10-10")
@@ -168,6 +171,7 @@ internal class MetafileParserTest {
                     airportIdent = "NGF",
                     airportName = "KANEOHE BAY MCAS",
                     cityName = "MOKAPU POINT",
+                    procedureUid = 41584,
                     stateCode = "HI"
                 )
             )
@@ -186,6 +190,7 @@ internal class MetafileParserTest {
                     airportIdent = "HMN",
                     airportName = "HOLLOMAN AFB",
                     cityName = "ALAMOGORDO",
+                    procedureUid = 24071,
                     stateCode = "NM"
                 )
             )
@@ -201,6 +206,7 @@ internal class MetafileParserTest {
                     airportIdent = "NHU",
                     airportName = "NORFOLK NS HELIPORT",
                     cityName = "NORFOLK",
+                    procedureUid = 40317,
                     stateCode = "VA"
                 )
             )
@@ -285,6 +291,7 @@ internal class MetafileParserTest {
                     airportIdent = "ATL",
                     airportName = "HARTSFIELD - JACKSON ATLANTA INTL",
                     cityName = "ATLANTA",
+                    procedureUid = 36632,
                     stateCode = "GA"
                 )
             )
@@ -300,6 +307,7 @@ internal class MetafileParserTest {
                     airportIdent = "DEN",
                     airportName = "DENVER INTL",
                     cityName = "DENVER",
+                    procedureUid = 40045,
                     stateCode = "CO"
                 )
             )
@@ -351,6 +359,7 @@ internal class MetafileParserTest {
                     airportIdent = "AST",
                     airportName = "ASTORIA RGNL",
                     cityName = "ASTORIA",
+                    procedureUid = 14740,
                     stateCode = "OR"
                 )
             )
@@ -366,6 +375,7 @@ internal class MetafileParserTest {
                     airportIdent = "NGF",
                     airportName = "KANEOHE BAY MCAS",
                     cityName = "MOKAPU POINT",
+                    procedureUid = 41576,
                     stateCode = "HI"
                 )
             )
@@ -417,6 +427,7 @@ internal class MetafileParserTest {
                     airportIdent = "ABQ",
                     airportName = "ALBUQUERQUE INTL SUNPORT",
                     cityName = "ALBUQUERQUE",
+                    procedureUid = 40610,
                     stateCode = "NM"
                 )
             )
@@ -432,6 +443,7 @@ internal class MetafileParserTest {
                     airportIdent = "RUQ",
                     airportName = "MID-CAROLINA RGNL",
                     cityName = "SALISBURY",
+                    procedureUid = 15832,
                     stateCode = "NC"
                 )
             )
