@@ -1,8 +1,8 @@
 package cinira
 
-import cinira.model.ApproachMetadata
-import cinira.model.ChartMetadata
-import cinira.model.SegmentIndex
+import cinira.dtpp.ApproachMetadata
+import cinira.dtpp.ChartMetadata
+import cinira.dtpp.SegmentIndex
 import org.apache.commons.io.input.CloseShieldInputStream
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

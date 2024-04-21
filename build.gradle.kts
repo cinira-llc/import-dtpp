@@ -8,6 +8,8 @@ plugins {
     kotlin("plugin.noarg") version "1.9.23"
 }
 
+apply(from = "./repository.gradle.kts")
+
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(21))
@@ -33,6 +35,7 @@ dependencies {
     //</editor-fold>
 
     //<editor-fold desc="Implementation dependencies">
+    implementation("cinira:demo-model:1.0.15")
     implementation("commons-io:commons-io:2.16.1")
     implementation("com.amazonaws:aws-lambda-java-events:3.11.5")
     implementation("com.fasterxml.jackson.core:jackson-databind")
@@ -81,6 +84,8 @@ dependencies {
 repositories {
     mavenCentral()
     mavenLocal()
+    val ciniraArtifacts: Action<RepositoryHandler> by rootProject.extra
+    ciniraArtifacts(this)
 }
 
 configurations {

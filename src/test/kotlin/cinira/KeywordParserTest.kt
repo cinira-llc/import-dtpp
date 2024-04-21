@@ -1,6 +1,6 @@
 package cinira
 
-import cinira.model.MediaEntry
+import cinira.dtpp.MediaEntry
 import org.apache.commons.io.input.CloseShieldInputStream
 import org.apache.pdfbox.Loader
 import org.assertj.core.api.Assertions.assertThat

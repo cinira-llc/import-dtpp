@@ -1,9 +1,9 @@
 package cinira
 
-import cinira.model.MediaEntry
-import cinira.model.DatasetEntry
-import cinira.model.SegmentIndex
-import cinira.model.ThumbnailEntry
+import cinira.dtpp.MediaEntry
+import cinira.dtpp.DatasetEntry
+import cinira.dtpp.SegmentIndex
+import cinira.dtpp.ThumbnailEntry
 import cinira.util.put
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature

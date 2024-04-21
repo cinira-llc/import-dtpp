@@ -1,6 +1,6 @@
 package cinira
 
-import cinira.model.ApproachMetadata
+import cinira.dtpp.ApproachMetadata
 import cinira.parser.ApproachChartTitleBaseListener
 import cinira.parser.ApproachChartTitleParser
 import org.antlr.v4.runtime.Token
@@ -197,9 +197,9 @@ internal class ExtractIapData(
 }
 
 /**
- * Get the appropriate [ApproachType] per the content of a `guidance` parser token.
+ * Get the appropriate [ApproachMetadata.Type] per the content of a `guidance` parser token.
  *
- * @return [ApproachType]
+ * @return [ApproachMetadata.Type]
  * @throws IllegalArgumentException if the state of the parser token does not correspond to a supported value.
  */
 private fun ApproachChartTitleParser.GuidanceContext.toApproachType() =

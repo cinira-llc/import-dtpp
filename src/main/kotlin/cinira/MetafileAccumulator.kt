@@ -1,8 +1,8 @@
 package cinira
 
-import cinira.model.ApproachMetadata
-import cinira.model.ChartMetadata
-import cinira.model.CycleMetafile
+import cinira.dtpp.ApproachMetadata
+import cinira.dtpp.ChartMetadata
+import cinira.dtpp.CycleMetafile
 import java.time.Instant
 
 /**

@@ -1,8 +1,8 @@
 package cinira
 
-import cinira.model.ApproachMetadata
-import cinira.model.ChartMetadata
-import cinira.model.SegmentIndex
+import cinira.dtpp.ApproachMetadata
+import cinira.dtpp.ChartMetadata
+import cinira.dtpp.SegmentIndex
 import cinira.parser.ApproachChartTitleLexer
 import cinira.parser.ApproachChartTitleParser
 import org.antlr.v4.runtime.CharStreams
