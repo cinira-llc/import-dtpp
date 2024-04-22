@@ -3,6 +3,10 @@ on:
   push:
     branches:
       - master
+
+env:
+  PACKAGES_ACCESS_TOKEN: ${{ secrets.PACKAGES_ACCESS_TOKEN }}
+
 jobs:
   release_master:
     name: Release master
@@ -25,7 +29,7 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v3
 
-      - run: ./gradlew test
+      - run: ./gradlew -Pcinira_artifacts_repo_password=$PACKAGES_ACCESS_TOKEN test
 
       - uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
@@ -40,7 +44,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tag_prefix: v_
 
-      - run: ./gradlew -x test -Pversion=${{ steps.semantic_version.outputs.new_version }} build
+      - run: ./gradlew -x test -Pcinira_artifacts_repo_password=$PACKAGES_ACCESS_TOKEN -Pversion=${{ steps.semantic_version.outputs.new_version }} build
         if: ${{ steps.semantic_version.outputs.new_version || false }}
 
       - uses: softprops/action-gh-release@v1
