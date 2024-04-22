@@ -125,13 +125,13 @@ internal class ImportDtppSegmentImpl private constructor(
             /* Generate and store the chart thumbnail(s). */
             val pdf = Loader.loadPDF(buffer)
             val renderer = PDFRenderer(pdf)
-            val thumbnail30 = renderer.renderImageWithDPI(0, 30.0f)
-            val png30 = ByteArrayOutputStream(256 * 1024).also { output ->
-                ImageIO.write(thumbnail30, "png", output)
+            val thumbnail60 = renderer.renderImageWithDPI(0, 60.0f)
+            val png60 = ByteArrayOutputStream(256 * 1024).also { output ->
+                ImageIO.write(thumbnail60, "png", output)
             }.toByteArray()
-            val thumbnail30Key = "$base/img/${path.nameWithoutExtension}@30.png"
-            log.trace("Storing chart [{}] 30dpi thumbnail to [{}].", name, thumbnail30Key)
-            client.put(targetBucket, thumbnail30Key, png30.size.toLong(), MimeTypeUtils.IMAGE_PNG, png30::inputStream)
+            val thumbnail60Key = "$base/img/${path.nameWithoutExtension}@60.png"
+            log.trace("Storing chart [{}] 60dpi thumbnail to [{}].", name, thumbnail60Key)
+            client.put(targetBucket, thumbnail60Key, png60.size.toLong(), MimeTypeUtils.IMAGE_PNG, png60::inputStream)
 
             /* Assemble and add the segment index entry. */
             val chart = MediaEntry(
@@ -142,9 +142,9 @@ internal class ImportDtppSegmentImpl private constructor(
                 thumbnail = listOf(
                     ThumbnailEntry(
                         contentType = MimeTypeUtils.IMAGE_PNG.toString(),
-                        size = png30.size.toLong(),
-                        dimensions = arrayOf(thumbnail30.width, thumbnail30.height),
-                        dpi = 30
+                        size = png60.size.toLong(),
+                        dimensions = arrayOf(thumbnail60.width, thumbnail60.height),
+                        dpi = 60
                     )
                 )
             )
@@ -167,13 +167,13 @@ internal class ImportDtppSegmentImpl private constructor(
             /* Generate and store the diff thumbnail(s). */
             val pdf = Loader.loadPDF(buffer)
             val renderer = PDFRenderer(pdf)
-            val thumbnail30 = renderer.renderImageWithDPI(0, 30.0f)
-            val png30 = ByteArrayOutputStream(256 * 1024).also { output ->
-                ImageIO.write(thumbnail30, "png", output)
+            val thumbnail60 = renderer.renderImageWithDPI(0, 60.0f)
+            val png60 = ByteArrayOutputStream(256 * 1024).also { output ->
+                ImageIO.write(thumbnail60, "png", output)
             }.toByteArray()
-            val thumbnail30Key = "$base/img/${path.nameWithoutExtension}.png"
-            log.trace("Storing chart revision [{}] 30dpi thumbnail to [{}].", name, thumbnail30Key)
-            client.put(targetBucket, thumbnail30Key, png30.size.toLong(), MimeTypeUtils.IMAGE_PNG, png30::inputStream)
+            val thumbnail60Key = "$base/img/${path.nameWithoutExtension}@60.png"
+            log.trace("Storing chart revision [{}] 60dpi thumbnail to [{}].", name, thumbnail60Key)
+            client.put(targetBucket, thumbnail60Key, png60.size.toLong(), MimeTypeUtils.IMAGE_PNG, png60::inputStream)
 
             /* Assemble and add the segment index entry. */
             val diff = MediaEntry(
@@ -184,9 +184,9 @@ internal class ImportDtppSegmentImpl private constructor(
                 thumbnail = listOf(
                     ThumbnailEntry(
                         contentType = MimeTypeUtils.IMAGE_PNG.toString(),
-                        size = png30.size.toLong(),
-                        dimensions = arrayOf(thumbnail30.width, thumbnail30.height),
-                        dpi = 30
+                        size = png60.size.toLong(),
+                        dimensions = arrayOf(thumbnail60.width, thumbnail60.height),
+                        dpi = 60
                     )
                 )
             )
