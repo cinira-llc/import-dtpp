@@ -43,8 +43,8 @@ internal class MetafileParserTest {
         /* Cycle attributes. */
         assertThat(metafile.cycle).isEqualTo(2404)
         assertThat(metafile.segments).isEqualTo(setOf("DDTPPA", "DDTPPB", "DDTPPC", "DDTPPD", "DDTPPE"))
-        assertThat(metafile.effectiveStartDateTime).isEqualTo("2024-04-18T09:01:00Z")
-        assertThat(metafile.effectiveEndDateTime).isEqualTo("2024-05-16T09:01:00Z")
+        assertThat(metafile.effectiveEnd).isEqualTo("2024-05-16T09:01:00Z")
+        assertThat(metafile.effectiveStart).isEqualTo("2024-04-18T09:01:00Z")
 
         /* Airport diagrams. */
         assertThat(metafile.airportDiagrams)

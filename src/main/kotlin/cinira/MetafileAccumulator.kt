@@ -2,25 +2,25 @@ package cinira
 
 import cinira.dtpp.ApproachMetadata
 import cinira.dtpp.ChartMetadata
-import cinira.dtpp.CycleMetafile
+import cinira.dtpp.DtppMetafile
 import java.time.Instant
 
 /**
  * [MetafileAccumulator]
  */
 internal data class MetafileAccumulator(
-    val metafile: CycleMetafile? = null
+    val metafile: DtppMetafile? = null
 ) {
     fun attributes(cycle: Int, segments: Set<String>, effectiveStartDateTime: Instant, effectiveEndDateTime: Instant) =
         if (null != metafile) {
             throw IllegalStateException("Cycle attributes already set.")
         } else {
             copy(
-                metafile = CycleMetafile(
+                metafile = DtppMetafile(
                     cycle = cycle,
                     segments = segments,
-                    effectiveStartDateTime = effectiveStartDateTime,
-                    effectiveEndDateTime = effectiveEndDateTime
+                    effectiveEnd = effectiveEndDateTime,
+                    effectiveStart = effectiveStartDateTime
                 )
             )
         }
@@ -148,6 +148,6 @@ internal data class MetafileAccumulator(
             )
         }
 
-    private fun metafile(closure: CycleMetafile.() -> CycleMetafile) =
+    private fun metafile(closure: DtppMetafile.() -> DtppMetafile) =
         closure(metafile!!)
 }
